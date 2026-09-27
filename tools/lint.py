@@ -1,0 +1,95 @@
+"""Static checks for the mod, since the game itself can't run in CI.
+
+Usage: python3 tools/lint.py [--cwe PATH_TO_CWE_CHECKOUT]
+Exits non-zero if anything is wrong. --cwe also checks that every granted
+technology exists in CWE.
+"""
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+BOM = b"\xef\xbb\xbf"
+LOC_PATH = ROOT / "localization/english/agi_l_english.yml"
+
+
+def script(path):
+    """File text with comments and quoted strings removed."""
+    text = path.read_text(encoding="utf-8-sig")
+    text = re.sub(r'"[^"\n]*"', '""', text)
+    return re.sub(r"#[^\n]*", "", text)
+
+
+def top_level_keys(text):
+    keys, depth = [], 0
+    for token in re.findall(r"[\w.:]+(?=\s*=\s*\{)|[{}]", text):
+        if token == "{":
+            depth += 1
+        elif token == "}":
+            depth -= 1
+        elif depth == 0:
+            keys.append(token)
+    return keys
+
+
+def _defined(files, folder):
+    return {k for p, t in files.items() if folder in p.as_posix() for k in top_level_keys(t)}
+
+
+def _rule_texts(files):
+    return [t for p, t in files.items() if "common/game_rules" in p.as_posix()]
+
+
+def check_braces(files):
+    return [f"{p.relative_to(ROOT)}: unbalanced braces" for p, t in files.items() if t.count("{") != t.count("}")]
+
+
+def check_references(files):
+    text = "\n".join(files.values())
+    options = set(re.findall(r"^\t(\w+) = \{", "\n".join(_rule_texts(files)), re.M))
+    checks = [
+        ("scripted effect or trigger", r"\b(agi_\w+) = yes",
+         _defined(files, "common/scripted_effects") | _defined(files, "common/scripted_triggers")),
+        ("modifier", r"(?:add_modifier = \{ name|has_modifier|remove_modifier) = (agi_\w+)",
+         _defined(files, "common/static_modifiers")),
+        ("event", r"trigger_event = \{ id = ([\w.]+)", _defined(files, "events/")),
+        ("game rule option", r"has_game_rule = (\w+)", options),
+    ]
+    return [f"undefined {kind}: {name}" for kind, pattern, known in checks
+            for name in sorted(set(re.findall(pattern, text)) - known)]
+
+
+def check_localisation(files):
+    raw = LOC_PATH.read_bytes()
+    errors = [] if raw.startswith(BOM + b"l_english:") else ["localisation must start with a UTF-8 BOM and 'l_english:'"]
+    loc = set(re.findall(r"^ ([\w.]+):0 ", raw.decode("utf-8-sig"), re.M))
+    text = "\n".join(files.values())
+    rules = "\n".join(_rule_texts(files))
+    options = re.findall(r"^\t(\w+) = \{", rules, re.M)
+    needed = set(re.findall(r"(?:title|desc|name) = (agi\.[\w.]+)", text))
+    needed |= {k for m in _defined(files, "common/static_modifiers") for k in (m, m + "_desc")}
+    needed |= {"rule_" + r for r in top_level_keys(rules)}
+    needed |= {k for o in options for k in ("setting_" + o, "setting_" + o + "_desc")}
+    return errors + [f"missing localisation key: {k}" for k in sorted(needed - loc)]
+
+
+def check_cwe_techs(files, cwe):
+    tech_files = (cwe / "common/technology/technologies").glob("*.txt")
+    known = {k for p in tech_files for k in top_level_keys(script(p))}
+    granted = set(re.findall(r"add_technology_researched = (\w+)", "\n".join(files.values())))
+    return [f"technology not in CWE: {t}" for t in sorted(granted - known)]
+
+
+def main():
+    files = {p: script(p) for p in ROOT.rglob("*.txt") if "tools" not in p.parts}
+    errors = check_braces(files) + check_references(files) + check_localisation(files)
+    if "--cwe" in sys.argv:
+        errors += check_cwe_techs(files, Path(sys.argv[sys.argv.index("--cwe") + 1]))
+    for e in errors:
+        print(e)
+    print(f"{len(errors)} problem(s)")
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

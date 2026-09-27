@@ -1,0 +1,217 @@
+# Mechanism: raise a country's AI deployment level (country scope).
+# A level N grant gives CWE's electronics, services and manufacturing techs up to
+# tier 5+N, which unlocks CWE's automation production methods (the job cuts),
+# and swaps in the agi_tier_N output modifier. Levels only go up.
+
+agi_clear_tier_modifiers = {
+	if = { limit = { has_modifier = agi_tier_1 } remove_modifier = agi_tier_1 }
+	if = { limit = { has_modifier = agi_tier_2 } remove_modifier = agi_tier_2 }
+	if = { limit = { has_modifier = agi_tier_3 } remove_modifier = agi_tier_3 }
+	if = { limit = { has_modifier = agi_tier_4 } remove_modifier = agi_tier_4 }
+	if = { limit = { has_modifier = agi_tier_5 } remove_modifier = agi_tier_5 }
+}
+
+agi_grant_level_6 = {
+	add_technology_researched = tech_electronics_1
+	add_technology_researched = tech_electronics_2
+	add_technology_researched = tech_electronics_3
+	add_technology_researched = tech_electronics_4
+	add_technology_researched = tech_electronics_5
+	add_technology_researched = tech_electronics_6
+	add_technology_researched = tech_services_1
+	add_technology_researched = tech_services_2
+	add_technology_researched = tech_services_3
+	add_technology_researched = tech_services_4
+	add_technology_researched = tech_services_5
+	add_technology_researched = tech_services_6
+	add_technology_researched = tech_manufacturing_1
+	add_technology_researched = tech_manufacturing_2
+	add_technology_researched = tech_manufacturing_3
+	add_technology_researched = tech_manufacturing_4
+	add_technology_researched = tech_manufacturing_5
+	add_technology_researched = tech_manufacturing_6
+}
+
+agi_grant_level_7 = {
+	agi_grant_level_6 = yes
+	add_technology_researched = tech_electronics_7
+	add_technology_researched = tech_services_7
+	add_technology_researched = tech_manufacturing_7
+}
+
+agi_grant_level_8 = {
+	agi_grant_level_7 = yes
+	add_technology_researched = tech_electronics_8
+	add_technology_researched = tech_services_8
+	add_technology_researched = tech_manufacturing_8
+}
+
+agi_grant_level_9 = {
+	agi_grant_level_8 = yes
+	add_technology_researched = tech_electronics_9
+	add_technology_researched = tech_services_9
+	add_technology_researched = tech_manufacturing_9
+}
+
+agi_grant_level_10 = {
+	agi_grant_level_9 = yes
+	add_technology_researched = tech_electronics_10
+	add_technology_researched = tech_services_10
+	add_technology_researched = tech_manufacturing_10
+}
+
+agi_set_tier_1 = {
+	if = {
+		limit = { NOT = { has_variable = agi_tier } }
+		agi_clear_tier_modifiers = yes
+		add_modifier = { name = agi_tier_1 }
+		agi_grant_level_6 = yes
+		set_variable = { name = agi_tier value = 1 }
+		if = { limit = { is_player = yes } trigger_event = { id = agi.1 } }
+	}
+}
+
+agi_set_tier_2 = {
+	if = {
+		limit = {
+			OR = {
+				NOT = { has_variable = agi_tier }
+				var:agi_tier < 2
+			}
+		}
+		agi_clear_tier_modifiers = yes
+		add_modifier = { name = agi_tier_2 }
+		agi_grant_level_7 = yes
+		set_variable = { name = agi_tier value = 2 }
+		if = { limit = { is_player = yes } trigger_event = { id = agi.2 } }
+	}
+}
+
+agi_set_tier_3 = {
+	if = {
+		limit = {
+			OR = {
+				NOT = { has_variable = agi_tier }
+				var:agi_tier < 3
+			}
+		}
+		agi_clear_tier_modifiers = yes
+		add_modifier = { name = agi_tier_3 }
+		agi_grant_level_8 = yes
+		set_variable = { name = agi_tier value = 3 }
+		if = { limit = { is_player = yes } trigger_event = { id = agi.3 } }
+	}
+}
+
+agi_set_tier_4 = {
+	if = {
+		limit = {
+			OR = {
+				NOT = { has_variable = agi_tier }
+				var:agi_tier < 4
+			}
+		}
+		agi_clear_tier_modifiers = yes
+		add_modifier = { name = agi_tier_4 }
+		agi_grant_level_9 = yes
+		set_variable = { name = agi_tier value = 4 }
+		if = { limit = { is_player = yes } trigger_event = { id = agi.4 } }
+	}
+}
+
+agi_set_tier_5 = {
+	if = {
+		limit = {
+			OR = {
+				NOT = { has_variable = agi_tier }
+				var:agi_tier < 5
+			}
+		}
+		agi_clear_tier_modifiers = yes
+		add_modifier = { name = agi_tier_5 }
+		agi_grant_level_10 = yes
+		set_variable = { name = agi_tier value = 5 }
+		if = { limit = { is_player = yes } trigger_event = { id = agi.5 } }
+	}
+}
+
+agi_set_dividend_1 = {
+	if = {
+		limit = {
+			NOT = { has_modifier = agi_dividend_1 }
+			NOT = { has_modifier = agi_dividend_2 }
+		}
+		add_modifier = { name = agi_dividend_1 }
+	}
+}
+
+agi_set_dividend_2 = {
+	if = {
+		limit = { NOT = { has_modifier = agi_dividend_2 } }
+		if = { limit = { has_modifier = agi_dividend_1 } remove_modifier = agi_dividend_1 }
+		add_modifier = { name = agi_dividend_2 }
+	}
+}
+
+agi_notify_players = {
+	every_country = {
+		limit = { is_player = yes }
+		if = {
+			limit = { has_global_variable = agi_scenario_over }
+			trigger_event = { id = agi.11 }
+		}
+		else_if = {
+			limit = { has_game_rule = agi_scenario_ai2027_race }
+			trigger_event = { id = agi.21 }
+		}
+		else_if = {
+			limit = { has_game_rule = agi_scenario_ai2027_slowdown }
+			trigger_event = { id = agi.22 }
+		}
+		else_if = {
+			limit = { has_game_rule = agi_scenario_ai2040_plan_a }
+			trigger_event = { id = agi.23 }
+		}
+	}
+}
+
+# Global scope, monthly. Starts the scenario clock at the chosen shock date,
+# advances it one month per month, and applies the active scenario's schedule.
+agi_scenario_tick = {
+	if = {
+		limit = {
+			NOT = { has_game_rule = agi_scenario_none }
+			NOT = { has_global_variable = agi_scenario_over }
+			OR = {
+				AND = { has_game_rule = agi_shock_start_1955 game_date >= 1955.1.1 }
+				AND = { has_game_rule = agi_shock_start_1970 game_date >= 1970.1.1 }
+				AND = { has_game_rule = agi_shock_start_1985 game_date >= 1985.1.1 }
+			}
+		}
+		if = {
+			limit = { NOT = { has_global_variable = agi_month } }
+			set_global_variable = { name = agi_month value = 0 }
+			agi_notify_players = yes
+		}
+		else = {
+			change_global_variable = { name = agi_month add = 1 }
+		}
+		if = {
+			limit = { has_game_rule = agi_scenario_ai2027_race }
+			agi_schedule_ai2027_race = yes
+		}
+		else_if = {
+			limit = { has_game_rule = agi_scenario_ai2027_slowdown }
+			agi_schedule_ai2027_slowdown = yes
+		}
+		else_if = {
+			limit = { has_game_rule = agi_scenario_ai2040_plan_a }
+			agi_schedule_ai2040_plan_a = yes
+		}
+	}
+}
+
+agi_end_scenario = {
+	set_global_variable = agi_scenario_over
+	agi_notify_players = yes
+}

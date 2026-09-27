@@ -1,0 +1,12 @@
+{
+  "name" : "AGI Lab (for Cold War Era)",
+  "id" : "vic3_agi_lab",
+  "version" : "0.1.0",
+  "supported_game_version" : "1.13.*",
+  "short_description" : "AI 2027 and AI 2040 scenarios as a controlled AI shock on top of the Cold War Era mod. Load after CWE.",
+  "tags" : [],
+  "relationships" : [],
+  "game_custom_data" : {
+    "multiplayer_synchronized" : true
+  }
+}

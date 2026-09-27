@@ -1,0 +1,133 @@
+# Scenario schedules (global scope). Month 0 = the shock start = January 2026 in
+# the source scenario. Steps use ">=" so a missed month still applies; the tier
+# effects only ever raise a level, so re-running a step is a no-op.
+# The dates each step cites are the scenario's; "(inferred)" marks our reading.
+
+# AI 2027, race ending (ai-2027.com). Stops mid-2029: the scenario's mid-2030
+# human extinction is outside what an economic model can say anything about.
+agi_schedule_ai2027_race = {
+	# Jan 2026: Agent-1 era agents at the two leading labs.
+	if = { limit = { exists = c:USA } c:USA = { agi_set_tier_1 = yes } }
+	if = { limit = { exists = c:PRC } c:PRC = { agi_set_tier_1 = yes } }
+	# Jul 2027: Agent-3-mini released publicly (cheap remote worker).
+	if = {
+		limit = { global_var:agi_month >= 18 exists = c:USA }
+		c:USA = { agi_set_tier_2 = yes }
+	}
+	# Sep 2027: China about two months behind (inferred for deployment).
+	if = {
+		limit = { global_var:agi_month >= 20 exists = c:PRC }
+		c:PRC = { agi_set_tier_2 = yes }
+	}
+	# Jan 2028: rest of the world gets cheap remote workers (inferred lag).
+	if = {
+		limit = { global_var:agi_month >= 24 }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_2 = yes }
+	}
+	# Mid 2028: Agent-5 released publicly, special economic zones, robot build-out.
+	if = {
+		limit = { global_var:agi_month >= 30 exists = c:USA }
+		c:USA = { agi_set_tier_5 = yes }
+	}
+	if = {
+		limit = { global_var:agi_month >= 30 exists = c:PRC }
+		c:PRC = { agi_set_tier_4 = yes }
+	}
+	# Jan 2029: diffusion to everyone else (inferred).
+	if = {
+		limit = { global_var:agi_month >= 36 }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_3 = yes }
+	}
+	# Jul 2029: end of the modelled window.
+	if = { limit = { global_var:agi_month >= 42 } agi_end_scenario = yes }
+}
+
+# AI 2027, slowdown ending (ai-2027.com/slowdown). Same as the race until the
+# October 2027 branch point.
+agi_schedule_ai2027_slowdown = {
+	if = { limit = { exists = c:USA } c:USA = { agi_set_tier_1 = yes } }
+	if = { limit = { exists = c:PRC } c:PRC = { agi_set_tier_1 = yes } }
+	if = {
+		limit = { global_var:agi_month >= 18 exists = c:USA }
+		c:USA = { agi_set_tier_2 = yes }
+	}
+	if = {
+		limit = { global_var:agi_month >= 20 exists = c:PRC }
+		c:PRC = { agi_set_tier_2 = yes }
+	}
+	if = {
+		limit = { global_var:agi_month >= 24 }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_2 = yes }
+	}
+	# May 2028: superhuman AI released to the public.
+	if = {
+		limit = { global_var:agi_month >= 28 exists = c:USA }
+		c:USA = { agi_set_tier_5 = yes }
+	}
+	# Jul 2028: US-China deal (Consensus-1 and chip swap).
+	if = {
+		limit = { global_var:agi_month >= 30 exists = c:PRC }
+		c:PRC = { agi_set_tier_4 = yes }
+	}
+	# 2029: transformation spreads under a US-led order (inferred).
+	if = {
+		limit = { global_var:agi_month >= 36 }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_4 = yes }
+	}
+	# 2030: superintelligence economy everywhere (inferred).
+	if = {
+		limit = { global_var:agi_month >= 48 }
+		if = { limit = { exists = c:PRC } c:PRC = { agi_set_tier_5 = yes } }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_5 = yes }
+	}
+	if = { limit = { global_var:agi_month >= 60 } agi_end_scenario = yes }
+}
+
+# AI 2040: Plan A (ai-2040.com). A 2029 US-China deal pauses training, caps
+# compute and robots, spreads research across many companies, and delays
+# superintelligence from about 2030 to 2040. The deal is global (the
+# "Consortium"), so the rest of the world moves with the leaders (inferred).
+agi_schedule_ai2040_plan_a = {
+	# 2027: millions of AI agents in the US economy.
+	if = {
+		limit = { global_var:agi_month >= 12 }
+		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_1 = yes } }
+		if = { limit = { exists = c:PRC } c:PRC = { agi_set_tier_1 = yes } }
+	}
+	if = {
+		limit = { global_var:agi_month >= 24 }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_1 = yes }
+	}
+	# 2029-2030: training pause and verification; deployment holds (no step).
+	# 2031: first regulated models released; AI does a third of cognitive labour.
+	if = {
+		limit = { global_var:agi_month >= 60 }
+		every_country = { limit = { NOT = { is_country_type = decentralized } } agi_set_tier_2 = yes }
+	}
+	# 2032: real GDP up about 50%; cap-and-trade on compute and robots;
+	# the dividend and foreign aid begin.
+	if = {
+		limit = { global_var:agi_month >= 72 }
+		every_country = {
+			limit = { NOT = { is_country_type = decentralized } }
+			agi_set_tier_3 = yes
+			agi_set_dividend_1 = yes
+		}
+	}
+	# 2035: pause at top-expert AI; AI and robots do about 85% of labour;
+	# the dividend reaches about $1M.
+	if = {
+		limit = { global_var:agi_month >= 108 }
+		every_country = {
+			limit = { NOT = { is_country_type = decentralized } }
+			agi_set_tier_4 = yes
+			agi_set_dividend_2 = yes
+		}
+	}
+	# 2040: scaling to superintelligence resumes.
+	if = {
+		limit = { global_var:agi_month >= 168 }
+		every_country = { limit = { NOT = { is_country_type = decentralized } } agi_set_tier_5 = yes }
+	}
+	if = { limit = { global_var:agi_month >= 180 } agi_end_scenario = yes }
+}

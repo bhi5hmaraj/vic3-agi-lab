@@ -1,0 +1,106 @@
+namespace = agi
+
+# agi.1 - agi.5: the player's own economy reached an AI deployment level.
+
+agi.1 = {
+	type = country_event
+	title = agi.1.t
+	desc = agi.1.d
+	event_image = { texture = "southamerica_factory_opening" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}
+
+agi.2 = {
+	type = country_event
+	title = agi.2.t
+	desc = agi.2.d
+	event_image = { texture = "southamerica_factory_opening" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}
+
+agi.3 = {
+	type = country_event
+	title = agi.3.t
+	desc = agi.3.d
+	event_image = { texture = "southamerica_factory_opening" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}
+
+agi.4 = {
+	type = country_event
+	title = agi.4.t
+	desc = agi.4.d
+	event_image = { texture = "unspecific_factory_closed" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}
+
+agi.5 = {
+	type = country_event
+	title = agi.5.t
+	desc = agi.5.d
+	event_image = { texture = "unspecific_factory_closed" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}
+
+# agi.11: the scenario's modelled window is over.
+
+agi.11 = {
+	type = country_event
+	title = agi.11.t
+	desc = agi.11.d
+	event_image = { texture = "southamerica_factory_opening" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}
+
+# agi.21 - agi.23: scenario start briefings.
+
+agi.21 = {
+	type = country_event
+	title = agi.21.t
+	desc = agi.21.d
+	event_image = { texture = "southamerica_factory_opening" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}
+
+agi.22 = {
+	type = country_event
+	title = agi.22.t
+	desc = agi.22.d
+	event_image = { texture = "southamerica_factory_opening" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}
+
+agi.23 = {
+	type = country_event
+	title = agi.23.t
+	desc = agi.23.d
+	event_image = { texture = "southamerica_factory_opening" }
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	duration = 3
+	option = { name = agi.ok }
+}

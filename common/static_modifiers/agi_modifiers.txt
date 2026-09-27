@@ -1,0 +1,50 @@
+# AI deployment level of a country's economy (0-5), applied by agi_set_tier_N.
+# CWE's automation tech tiers already cut jobs; these add the output gain CWE lacks.
+# ponytail: throughput values are calibration knobs, not sourced numbers.
+# Tune them against the shape of AI 2040's employment and income curve (see README).
+
+agi_tier_1 = {
+	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
+	building_group_bg_service_throughput_add = 0.05
+	building_group_bg_manufacturing_throughput_add = 0.05
+}
+
+agi_tier_2 = {
+	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
+	building_group_bg_service_throughput_add = 0.15
+	building_group_bg_manufacturing_throughput_add = 0.15
+}
+
+agi_tier_3 = {
+	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
+	building_group_bg_service_throughput_add = 0.35
+	building_group_bg_manufacturing_throughput_add = 0.35
+}
+
+# Tiers 4 and 5 add robots doing physical labour.
+agi_tier_4 = {
+	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
+	building_group_bg_service_throughput_add = 0.75
+	building_group_bg_manufacturing_throughput_add = 0.75
+	building_group_bg_agriculture_throughput_add = 0.25
+	building_group_bg_mining_throughput_add = 0.25
+}
+
+agi_tier_5 = {
+	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
+	building_group_bg_service_throughput_add = 1.5
+	building_group_bg_manufacturing_throughput_add = 1.5
+	building_group_bg_agriculture_throughput_add = 0.75
+	building_group_bg_mining_throughput_add = 0.75
+}
+
+# AI 2040 Plan A: citizen's dividend paid from compute and robot permits.
+agi_dividend_1 = {
+	icon = gfx/interface/icons/timed_modifier_icons/modifier_coins_positive.dds
+	state_standard_of_living_add = 2
+}
+
+agi_dividend_2 = {
+	icon = gfx/interface/icons/timed_modifier_icons/modifier_coins_positive.dds
+	state_standard_of_living_add = 5
+}

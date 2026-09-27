@@ -1,0 +1,30 @@
+agi_scenario = {
+	default = agi_scenario_none
+
+	agi_scenario_none = {
+	}
+
+	agi_scenario_ai2027_race = {
+	}
+
+	agi_scenario_ai2027_slowdown = {
+	}
+
+	agi_scenario_ai2040_plan_a = {
+	}
+}
+
+# The shock needs an economy that can build computers and robots.
+# If automation never takes hold at 1955, use a later start.
+agi_shock_start = {
+	default = agi_shock_start_1955
+
+	agi_shock_start_1955 = {
+	}
+
+	agi_shock_start_1970 = {
+	}
+
+	agi_shock_start_1985 = {
+	}
+}

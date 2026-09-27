@@ -1,0 +1,4 @@
+# Sorts after CWE's cwe_defines.txt (END_DATE 2092) so this value wins.
+NGame = {
+	END_DATE = "2200.1.1"
+}

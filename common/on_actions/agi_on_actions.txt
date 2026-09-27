@@ -1,0 +1,12 @@
+# Appends to the game's monthly pulse without replacing CWE's own effects.
+on_monthly_pulse = {
+	on_actions = {
+		agi_on_monthly_pulse
+	}
+}
+
+agi_on_monthly_pulse = {
+	effect = {
+		agi_scenario_tick = yes
+	}
+}
