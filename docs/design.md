@@ -7,17 +7,18 @@ The goal is intuition, not prediction. What you learn here should be ported back
 ## How it works
 
 ```
-game rules --> monthly clock --> scenario schedule --> agi_set_tier_N --> CWE techs (automation cuts jobs)
- (scenario,     (month 0 =        (month, who,         (country)        + agi_tier_N modifier (output up)
-  start year)    shock start)      level 1-5)                           + player event (what to watch)
+game rules --> monthly clock --> scenario schedule --> agi_set_tier_N --> agi_tier_N modifier
+ (scenario,     (month 0 =        (month, who,         (country)          (each sector: fewer workers, more output)
+  start year)    shock start)      level 1-5)                           + agi_dividend_N modifier (income support)
+                                                                        + player event (what to watch)
 ```
 
 - `common/game_rules/agi_game_rules.txt`: two game rules, the scenario (or none, for the control) and the year the shock starts.
 - `common/on_actions/agi_on_actions.txt`: adds one monthly hook to the game's monthly pulse.
-- `common/scripted_effects/agi_effects.txt`: the mechanism. It holds the clock, the tier effects, the tech grants and the notifications.
+- `common/scripted_effects/agi_effects.txt`: the mechanism. It holds the clock, the tier and dividend effects, and the notifications.
 - `common/scripted_effects/agi_scenarios.txt`: the data. There is one schedule per scenario, and each step is a month, a group of countries and a level.
-- `common/scripted_triggers/agi_triggers.txt`: `agi_is_rest_of_world`.
-- `common/static_modifiers/agi_modifiers.txt`: the five tier modifiers (output) and two dividend modifiers.
+- `common/scripted_triggers/agi_triggers.txt`: `agi_is_china` and `agi_is_rest_of_world`.
+- `common/static_modifiers/agi_modifiers.txt`: the five tier modifiers (jobs and output per sector) and two dividend modifiers.
 - `events/agi_events.txt` and `localization/english/agi_l_english.yml`: the plain-language reports for players.
 - `common/defines/zz_agi_defines.txt`: moves CWE's end date from 2092 to 2200, so long runs never stop.
 - `tools/lint.py`: static checks, since the game can't run in CI.
@@ -49,7 +50,9 @@ The main risk is the "mirror problem": a lab that only echoes what you put in. V
 | New Millennium / vic3-modern-2000 | vanilla | none | stale / not playable | the only 2000 starts, and neither works |
 | **CWE (1950 start)** | **about 130 techs in eras 6-10 (labelled 2000-2099)** | **automation production methods, tiers 0-10, each cutting jobs for a specific pop type** | **active; the 1.13 build is pinned** | **chosen** |
 
-CWE already models the half of the AI shock that is hardest to build: which jobs disappear, for which pop types, at which tech tier. Its weaknesses are an early-stage mod, frequent patch churn and a 1950 start.
+CWE gives the lab a modern economy to shock: a large service sector split into basic, middle and advanced services, modern industry, welfare laws and a 1950 world. Its weaknesses are an early-stage mod, frequent patch churn and a 1950 start.
+
+v0.1 also leaned on CWE's automation production methods for the job cuts. The review showed that was a mistake (see decision 4).
 
 ### 3. Time: a relative clock, not a start year
 
@@ -62,26 +65,40 @@ CWE already models the half of the AI shock that is hardest to build: which jobs
 
 The automation dynamics don't depend on the calendar. So each scenario's January 2026 is mapped to a start year you choose (1955, 1970 or 1985), and the schedule counts months from there.
 
-The one real constraint is that the economy must be able to build computers, robots and software. A 1955 economy may not be able to switch to automation production methods yet.
-
-The throughput modifier still applies either way. If automation doesn't take hold, use a later start. That's why the start year is a game rule and not a constant.
+The shock itself works at any start year, because it needs no technology (decision 4). What changes with the start year is the economy being shocked. In 1955 most people work on farms and in factories, so the early, office-only AI levels move less. By 1985 the service sector is larger and the result is closer to today's. That is why the start year is a game rule and not a constant.
 
 ### 4. How the shock enters the economy
 
 | Option | Verdict |
 |---|---|
-| `add_era_researched` (whole eras) | Rejected. It also grants every military and society tech, many of which have real modifiers, so the shock would be contaminated. |
-| New tier-11 production methods injected into CWE's automation groups | Deferred to v2. It adds input-balancing work before we know it's needed. |
-| Pure modifiers (output up, jobs down) | Rejected as the only lever. It throws away CWE's job cuts by pop type, which are the most valuable part. |
-| **Targeted tech grants plus an output modifier** | **Chosen.** |
+| `add_era_researched` (whole eras) | Rejected. It also grants every military and society tech, so the shock would be contaminated. |
+| Grant CWE's electronics, services and manufacturing techs so its automation production methods cut the jobs (v0.1) | Rejected after review. See below. |
+| New tier-11 production methods injected into CWE's automation groups | Rejected for the same reasons as the tech grants. |
+| **One modifier per level: each sector needs fewer workers and produces more** | **Chosen.** |
 
-Level N grants CWE's `tech_electronics`, `tech_services` and `tech_manufacturing` up to tier 5+N. That unlocks CWE's own automation, which is where the job cuts come from. The `agi_tier_N` modifier adds output throughput to service and manufacturing buildings, plus agriculture and mining at levels 4-5 for robots. That is the half CWE lacks: in CWE, automation cuts jobs but never raises output per building.
+A level is one `agi_tier_N` modifier. For each sector it sets `building_group_<group>_employee_mult` (fewer workers per building) and `building_group_<group>_throughput_add` (more output). CWE pairs the same two keys in its own `oil_industry_concessions` modifier, so the pattern is known to work on this engine.
 
-Tech grants always include every lower tier. That avoids any question of whether a tech needs its prerequisites.
+Sectors move in the order the scenarios describe. Services (knowledge work) go first. Factories follow from level 2. Commercial farms, ranches and mines follow from level 4, when robots arrive. Subsistence farms are left out, because that is where the jobless end up.
+
+v0.1 granted CWE's techs instead. An adversarial review found that this would not work:
+
+- **Catch-up, not AI.** Level 1 granted tier 6 (CWE's 2000-2019 era) to a 1955 country at tier 2. The first step measured 60 years of ordinary automation, given to two countries only.
+- **Stalled automation.** The higher automation methods need software and computers as inputs. In 1955 nothing makes them, so the AI would not switch.
+- **Half the jobs untouched.** Half of each factory's jobs, and all farm and mine jobs, are set by a second production-method group gated by a tech we did not grant.
+- **Confounds.** The same techs double bureaucracy and tax capacity, unlock new industries, and trigger a CWE oil discovery for each tech a player gains.
+- **Players left out.** Only AI countries switch production methods by themselves, so the player's own economy never automated.
+
+The modifier has none of these problems. It is pure AI delta at any start year, it applies to player and AI countries alike, and the control run differs by exactly the modifier.
+
+The cost is detail. CWE's automation cuts specific jobs (machinists, clerks, engineers). The modifier cuts every job in a sector by the same share. Sector-level detail is enough for the questions this lab asks.
 
 ### 5. One dial per country, not two
 
-Earlier designs had a "lab level" (who leads the frontier) and a "deploy level" (what the economy uses). Only deployment moves an economy, so v1 keeps one dial, the deployment level (0-5). The frontier race is described in the event text instead. Add a second dial only if a scenario needs frontier capability to change economics directly.
+Earlier designs had a "lab level" (who leads the frontier) and a "deploy level" (what the economy uses). Only deployment moves an economy, so there is one dial, the deployment level (0-5). The frontier race is described in the event text instead.
+
+The level names describe deployment, not capability: AI Assistants, AI Remote Workers, AI-Majority Knowledge Work, AI and Robots, AI-Run Economy. A capability name such as "superhuman coder" fits AI 2027 but contradicts AI 2040, which holds AI below top-expert level until 2035.
+
+Add a second dial only if a scenario needs frontier capability to change economics directly.
 
 ### 6. How scenarios are encoded
 
@@ -96,7 +113,7 @@ With game rules, a newcomer never touches the console, and the control run is th
 
 Steps use `month >= M` and levels only ever go up. So a step re-running every month is a no-op, a missed month still applies, and loading a save mid-scenario is safe.
 
-Countries are grouped into the US, the PRC and everyone else (recognised countries only). The scenarios are US-China stories, and everyone else follows with a lag.
+Countries are grouped into the US, China and everyone else (recognised countries only). China is matched by either tag, PRC or CHI, because CWE can change one into the other. The scenarios are US-China stories, and everyone else follows with a lag.
 
 ### 7. Newcomer layer
 
@@ -104,7 +121,7 @@ Countries are grouped into the US, the PRC and everyone else (recognised countri
 |---|---|
 | A full lab panel (journal entry with levers and meters) | v2. It needs a played country, and most of its content should wait until v1 shows which numbers matter. |
 | **Events at each milestone that say what to watch, plus a README reading guide** | **Chosen.** |
-| Observe only | Allowed, but observers see no events. The README says to play a country and let time run. |
+| Observe only | Allowed, but observers see no events. Read the `agi_tier_N` modifier on the USA and China instead. |
 
 Newcomers only need to read five things: Employment, Standard of Living, Radicals, Interest Groups and GDP. The events point to them.
 
@@ -114,25 +131,26 @@ AI 2027 is precise about timing and almost silent on economics. Its only labour 
 
 AI 2040: Plan A publishes a per-year dashboard. US employment goes 62% (2029), 32% (2035), 12% (2040). Median income goes $47K (2027), about $1.1M (2035), about $13M (2040). GDP grows about 50% in 2032.
 
-The tier modifier values are knobs, not sourced numbers. Tune them until the Victoria 3 run matches the *shape* of those curves: direction and ordering. Don't aim for the absolute values. The engine won't reproduce a 99% income-per-capita jump, and trying would break it.
+The tier and dividend modifier values are knobs, not sourced numbers. Tune them until the Victoria 3 run matches the *shape* of those curves: direction and ordering. Don't aim for the absolute values. The engine won't reproduce a 99% income-per-capita jump, and trying would break it.
 
 ### 9. Verifying without the game
 
 Victoria 3 can't run in CI, so the repo checks what it can statically:
-- `tools/lint.py` checks balanced braces, and that every scripted effect, modifier, event and game-rule option is defined. It also checks every localisation key and the UTF-8 byte-order mark the engine requires. With `--cwe PATH`, it checks that every granted tech exists in CWE.
+- `tools/lint.py` checks balanced braces, and that every scripted effect, modifier, event and game-rule option is defined. It also checks every localisation key, the UTF-8 byte-order mark the engine requires, and that no job cut goes below the -0.8 floor. With `--cwe PATH`, it checks that every building group a modifier names exists in CWE.
 - Every engine construct used here was copied from a pattern CWE itself uses in the same scope.
-- An adversarial review checked engine semantics, fidelity to the scenarios, and economic logic (see `scenarios.md` and the changelog).
+- An adversarial review checked engine semantics, fidelity to the scenarios, and economic logic. Fourteen findings survived two skeptics each. `CHANGELOG.md` lists what changed.
 - The in-game checks that remain are listed in the README under "First evening".
 
 ### 10. Pinning
 
 Game 1.13.11 plus CWE commit `fd5cb37909` (2026-08-30, the last 1.13 build). CWE master now targets the 1.14 beta, and patch 1.15 ships on 2026-10-22. Keep a local copy of CWE and unsubscribe from the Workshop item, so an auto-update can't change the base under your saves.
 
-### 11. Out of scope for v1
+### 11. Out of scope for now
 
-- Tier-11 automation production methods (see decision 4).
+- Cuts by job type inside a sector (see decision 4).
+- Government jobs. No level cuts bureaucrats.
+- Plantations, logging and fishing. Level 4 and 5 cover staple crops, livestock ranches and mines only.
 - The policymaker panel and a UBI law with interest-group reactions.
-- Automating agriculture, mining and government jobs. CWE has these production methods commented out, so v1 only adds output to those sectors.
 - AI 2040's other plans (B, C, D). Its Plans C and D map onto AI 2027's endings anyway.
-- AI 2027's race ending after mid-2029. Human extinction is outside what an economic model can say anything about, so the scenario stops there.
+- AI 2027's race ending after January 2030. The takeover and extinction are outside what an economic model can say anything about, so the scenario stops there.
 - Shipping the AI Futures Project's text or data. The repo links to the sources and paraphrases them.

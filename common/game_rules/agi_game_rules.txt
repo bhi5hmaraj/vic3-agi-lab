@@ -14,8 +14,8 @@ agi_scenario = {
 	}
 }
 
-# The shock needs an economy that can build computers and robots.
-# If automation never takes hold at 1955, use a later start.
+# The shock works at any start year. A later start has a larger service
+# sector, so the early AI levels move more of the economy.
 agi_shock_start = {
 	default = agi_shock_start_1955
 

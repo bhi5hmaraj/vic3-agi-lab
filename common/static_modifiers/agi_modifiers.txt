@@ -1,50 +1,75 @@
 # AI deployment level of a country's economy (0-5), applied by agi_set_tier_N.
-# CWE's automation tech tiers already cut jobs; these add the output gain CWE lacks.
-# ponytail: throughput values are calibration knobs, not sourced numbers.
-# Tune them against the shape of AI 2040's employment and income curve (see README).
+# Each level makes a sector need fewer workers (employee_mult) and produce more
+# (throughput). CWE pairs the same two keys in oil_industry_concessions.
+# Knowledge work (services) goes first. Robots reach factories at level 2, and
+# farms and mines at level 4.
+# ponytail: every number is a calibration knob, not a sourced figure. Tune them
+# against the shape of AI 2040's employment curve (docs/scenarios.md).
+# Keep each employee_mult above -0.8: other modifiers stack, and -1 means no jobs.
 
 agi_tier_1 = {
 	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
+	building_group_bg_service_employee_mult = -0.05
 	building_group_bg_service_throughput_add = 0.05
-	building_group_bg_manufacturing_throughput_add = 0.05
 }
 
 agi_tier_2 = {
 	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
+	building_group_bg_service_employee_mult = -0.15
 	building_group_bg_service_throughput_add = 0.15
-	building_group_bg_manufacturing_throughput_add = 0.15
+	building_group_bg_manufacturing_employee_mult = -0.05
+	building_group_bg_manufacturing_throughput_add = 0.05
 }
 
 agi_tier_3 = {
 	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
-	building_group_bg_service_throughput_add = 0.35
-	building_group_bg_manufacturing_throughput_add = 0.35
+	building_group_bg_service_employee_mult = -0.3
+	building_group_bg_service_throughput_add = 0.3
+	building_group_bg_manufacturing_employee_mult = -0.15
+	building_group_bg_manufacturing_throughput_add = 0.15
 }
 
-# Tiers 4 and 5 add robots doing physical labour.
+# Subsistence farms are left out on purpose: they are where the jobless end up.
 agi_tier_4 = {
 	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
-	building_group_bg_service_throughput_add = 0.75
-	building_group_bg_manufacturing_throughput_add = 0.75
-	building_group_bg_agriculture_throughput_add = 0.25
+	building_group_bg_service_employee_mult = -0.55
+	building_group_bg_service_throughput_add = 0.6
+	building_group_bg_manufacturing_employee_mult = -0.45
+	building_group_bg_manufacturing_throughput_add = 0.6
+	building_group_bg_staple_crops_employee_mult = -0.25
+	building_group_bg_staple_crops_throughput_add = 0.25
+	building_group_bg_livestock_ranches_employee_mult = -0.25
+	building_group_bg_livestock_ranches_throughput_add = 0.25
+	building_group_bg_mining_employee_mult = -0.25
 	building_group_bg_mining_throughput_add = 0.25
 }
 
+# Mining stops at -0.4: CWE's oil concessions add another -0.5 to oil extraction.
 agi_tier_5 = {
 	icon = gfx/interface/icons/timed_modifier_icons/modifier_gear_positive.dds
-	building_group_bg_service_throughput_add = 1.5
-	building_group_bg_manufacturing_throughput_add = 1.5
-	building_group_bg_agriculture_throughput_add = 0.75
-	building_group_bg_mining_throughput_add = 0.75
+	building_group_bg_service_employee_mult = -0.75
+	building_group_bg_service_throughput_add = 1.2
+	building_group_bg_manufacturing_employee_mult = -0.7
+	building_group_bg_manufacturing_throughput_add = 1.2
+	building_group_bg_staple_crops_employee_mult = -0.5
+	building_group_bg_staple_crops_throughput_add = 0.6
+	building_group_bg_livestock_ranches_employee_mult = -0.5
+	building_group_bg_livestock_ranches_throughput_add = 0.6
+	building_group_bg_mining_employee_mult = -0.4
+	building_group_bg_mining_throughput_add = 0.6
 }
 
-# AI 2040 Plan A: citizen's dividend paid from compute and robot permits.
+# Income support for the people AI displaces: a basic income, a citizen's
+# dividend or foreign aid. Welfare payments give pops real income, so demand
+# responds. CWE's starting_historical_sol pairs the same two keys.
 agi_dividend_1 = {
 	icon = gfx/interface/icons/timed_modifier_icons/modifier_coins_positive.dds
-	state_standard_of_living_add = 2
+	state_welfare_payments_add = 0.25
+	state_standard_of_living_add = 1
 }
 
 agi_dividend_2 = {
 	icon = gfx/interface/icons/timed_modifier_icons/modifier_coins_positive.dds
-	state_standard_of_living_add = 5
+	state_welfare_payments_add = 0.5
+	state_standard_of_living_add = 2
 }

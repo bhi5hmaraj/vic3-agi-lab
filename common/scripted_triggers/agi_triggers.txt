@@ -1,6 +1,15 @@
+# Country scope. CWE can turn the PRC into CHI (the one-China button and the
+# formable), so China is matched by either tag.
+agi_is_china = {
+	OR = {
+		c:PRC ?= this
+		c:CHI ?= this
+	}
+}
+
 # Country scope: every recognised country except the two leading AI powers.
 agi_is_rest_of_world = {
 	NOT = { is_country_type = decentralized }
 	NOT = { c:USA ?= this }
-	NOT = { c:PRC ?= this }
+	NOT = { agi_is_china = yes }
 }

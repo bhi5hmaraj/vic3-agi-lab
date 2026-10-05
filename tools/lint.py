@@ -1,8 +1,8 @@
 """Static checks for the mod, since the game itself can't run in CI.
 
 Usage: python3 tools/lint.py [--cwe PATH_TO_CWE_CHECKOUT]
-Exits non-zero if anything is wrong. --cwe also checks that every granted
-technology exists in CWE.
+Exits non-zero if anything is wrong. --cwe also checks that every building
+group a modifier names exists in CWE.
 """
 import re
 import sys
@@ -73,18 +73,24 @@ def check_localisation(files):
     return errors + [f"missing localisation key: {k}" for k in sorted(needed - loc)]
 
 
-def check_cwe_techs(files, cwe):
-    tech_files = (cwe / "common/technology/technologies").glob("*.txt")
-    known = {k for p in tech_files for k in top_level_keys(script(p))}
-    granted = set(re.findall(r"add_technology_researched = (\w+)", "\n".join(files.values())))
-    return [f"technology not in CWE: {t}" for t in sorted(granted - known)]
+def check_employee_floor(files):
+    """Other modifiers stack on ours, and a total of -1 leaves a sector with no jobs."""
+    cuts = re.findall(r"(building_group_\w+_employee_mult) = (-[\d.]+)", "\n".join(files.values()))
+    return [f"{key} = {value} is below the -0.8 floor" for key, value in cuts if float(value) < -0.8]
+
+
+def check_cwe_building_groups(files, cwe):
+    group_files = (cwe / "common/building_groups").glob("*.txt")
+    known = {k for p in group_files for k in top_level_keys(script(p))}
+    used = set(re.findall(r"building_group_(bg_\w+)_(?:employee_mult|throughput_add)", "\n".join(files.values())))
+    return [f"building group not in CWE: {g}" for g in sorted(used - known)]
 
 
 def main():
     files = {p: script(p) for p in ROOT.rglob("*.txt") if "tools" not in p.parts}
-    errors = check_braces(files) + check_references(files) + check_localisation(files)
+    errors = check_braces(files) + check_references(files) + check_localisation(files) + check_employee_floor(files)
     if "--cwe" in sys.argv:
-        errors += check_cwe_techs(files, Path(sys.argv[sys.argv.index("--cwe") + 1]))
+        errors += check_cwe_building_groups(files, Path(sys.argv[sys.argv.index("--cwe") + 1]))
     for e in errors:
         print(e)
     print(f"{len(errors)} problem(s)")

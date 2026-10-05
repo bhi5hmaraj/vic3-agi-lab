@@ -1,7 +1,6 @@
 # Mechanism: raise a country's AI deployment level (country scope).
-# A level N grant gives CWE's electronics, services and manufacturing techs up to
-# tier 5+N, which unlocks CWE's automation production methods (the job cuts),
-# and swaps in the agi_tier_N output modifier. Levels only go up.
+# A level is one agi_tier_N modifier. It applies to AI and player countries
+# alike and needs no technology, so it works at any start year. Levels only go up.
 
 agi_clear_tier_modifiers = {
 	if = { limit = { has_modifier = agi_tier_1 } remove_modifier = agi_tier_1 }
@@ -11,61 +10,10 @@ agi_clear_tier_modifiers = {
 	if = { limit = { has_modifier = agi_tier_5 } remove_modifier = agi_tier_5 }
 }
 
-agi_grant_level_6 = {
-	add_technology_researched = tech_electronics_1
-	add_technology_researched = tech_electronics_2
-	add_technology_researched = tech_electronics_3
-	add_technology_researched = tech_electronics_4
-	add_technology_researched = tech_electronics_5
-	add_technology_researched = tech_electronics_6
-	add_technology_researched = tech_services_1
-	add_technology_researched = tech_services_2
-	add_technology_researched = tech_services_3
-	add_technology_researched = tech_services_4
-	add_technology_researched = tech_services_5
-	add_technology_researched = tech_services_6
-	add_technology_researched = tech_manufacturing_1
-	add_technology_researched = tech_manufacturing_2
-	add_technology_researched = tech_manufacturing_3
-	add_technology_researched = tech_manufacturing_4
-	add_technology_researched = tech_manufacturing_5
-	add_technology_researched = tech_manufacturing_6
-}
-
-agi_grant_level_7 = {
-	agi_grant_level_6 = yes
-	add_technology_researched = tech_electronics_7
-	add_technology_researched = tech_services_7
-	add_technology_researched = tech_manufacturing_7
-}
-
-agi_grant_level_8 = {
-	agi_grant_level_7 = yes
-	add_technology_researched = tech_electronics_8
-	add_technology_researched = tech_services_8
-	add_technology_researched = tech_manufacturing_8
-}
-
-agi_grant_level_9 = {
-	agi_grant_level_8 = yes
-	add_technology_researched = tech_electronics_9
-	add_technology_researched = tech_services_9
-	add_technology_researched = tech_manufacturing_9
-}
-
-agi_grant_level_10 = {
-	agi_grant_level_9 = yes
-	add_technology_researched = tech_electronics_10
-	add_technology_researched = tech_services_10
-	add_technology_researched = tech_manufacturing_10
-}
-
 agi_set_tier_1 = {
 	if = {
 		limit = { NOT = { has_variable = agi_tier } }
-		agi_clear_tier_modifiers = yes
 		add_modifier = { name = agi_tier_1 }
-		agi_grant_level_6 = yes
 		set_variable = { name = agi_tier value = 1 }
 		if = { limit = { is_player = yes } trigger_event = { id = agi.1 } }
 	}
@@ -81,7 +29,6 @@ agi_set_tier_2 = {
 		}
 		agi_clear_tier_modifiers = yes
 		add_modifier = { name = agi_tier_2 }
-		agi_grant_level_7 = yes
 		set_variable = { name = agi_tier value = 2 }
 		if = { limit = { is_player = yes } trigger_event = { id = agi.2 } }
 	}
@@ -97,7 +44,6 @@ agi_set_tier_3 = {
 		}
 		agi_clear_tier_modifiers = yes
 		add_modifier = { name = agi_tier_3 }
-		agi_grant_level_8 = yes
 		set_variable = { name = agi_tier value = 3 }
 		if = { limit = { is_player = yes } trigger_event = { id = agi.3 } }
 	}
@@ -113,7 +59,6 @@ agi_set_tier_4 = {
 		}
 		agi_clear_tier_modifiers = yes
 		add_modifier = { name = agi_tier_4 }
-		agi_grant_level_9 = yes
 		set_variable = { name = agi_tier value = 4 }
 		if = { limit = { is_player = yes } trigger_event = { id = agi.4 } }
 	}
@@ -129,7 +74,6 @@ agi_set_tier_5 = {
 		}
 		agi_clear_tier_modifiers = yes
 		add_modifier = { name = agi_tier_5 }
-		agi_grant_level_10 = yes
 		set_variable = { name = agi_tier value = 5 }
 		if = { limit = { is_player = yes } trigger_event = { id = agi.5 } }
 	}
