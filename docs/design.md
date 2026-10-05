@@ -46,7 +46,7 @@ The main risk is the "mirror problem": a lab that only echoes what you put in. V
 | Option | Tech after 2000 | AI / automation already modelled | Status (Sep 2026) | Verdict |
 |---|---|---|---|---|
 | Vanilla | none (ends 1936) | no | stable | too early, no modern economy |
-| Tech & Res | about 29 techs, ends 2036 | datacenters, data economy | active, 1.13 | 1836 start; runs out by 2036 |
+| Tech & Res | about 29 techs in its last two eras | AI, data and processor goods; robot job cuts | active, 1.13 | 1836 start: 119 or more game years before the shock. Planned as a second base, see [bases.md](bases.md) |
 | UNIPOLAR (1992 start) | vanilla eras 1-5, compressed | AI service production methods (e.g. clerks -2835) | Steam build broken on 1.13.10+ | best realism, but broken and runs out of tech |
 | New Millennium / vic3-modern-2000 | vanilla | none | stale / not playable | the only 2000 starts, and neither works |
 | **CWE (1950 start)** | **about 130 techs in eras 6-10 (labelled 2000-2099)** | **automation production methods, tiers 0-10, each cutting jobs for a specific pop type** | **active; the 1.13 build is pinned** | **chosen** |

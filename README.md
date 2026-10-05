@@ -56,12 +56,15 @@ The scenario schedules, their sources and the calibration targets are in [docs/s
 4. Does the income floor raise incomes, and can the government budget carry it? Watch for countries going into default. Default cuts throughput by half, which would swamp the AI effect.
 5. At levels 4-5, check electricity and transportation in a few US states. Is supply under half of demand, and do service or factory buildings show an input-shortage penalty?
 6. Is the monthly speed still fine with ~200 countries checked each month?
+7. Can the AI Scenario rule be changed in a loaded save? Start with "None", save, reload, set a scenario, and look for the "AI Level" modifier a month later. If this works, branch the control and the scenario run from one save. They then share the same history up to the shock, which removes most of the noise between them.
 
 ## Design
 
 [docs/design.md](docs/design.md) explains the architecture, the options considered for each decision, and why the current one won.
 
 [docs/extending.md](docs/extending.md) is the plan for adding any other AGI scenario as one data file. It was tested against nine published AGI futures.
+
+[docs/bases.md](docs/bases.md) compares base mods and plans Tech & Res as a second base.
 
 [docs/simulacra.md](docs/simulacra.md) lists the game mechanics worth porting to Simulacra.
 
