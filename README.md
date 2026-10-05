@@ -61,6 +61,10 @@ The scenario schedules, their sources and the calibration targets are in [docs/s
 
 [docs/design.md](docs/design.md) explains the architecture, the options considered for each decision, and why the current one won.
 
+[docs/extending.md](docs/extending.md) is the plan for adding any other AGI scenario as one data file. It was tested against nine published AGI futures.
+
+[docs/simulacra.md](docs/simulacra.md) lists the game mechanics worth porting to Simulacra.
+
 ## Development
 
 ```bash
