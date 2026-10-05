@@ -2,14 +2,21 @@
 # the source scenario. Steps use ">=" so a missed month still applies. The tier
 # and dividend effects only ever raise a level, so re-running a step is a no-op.
 # docs/scenarios.md gives the source for each step and marks what is inferred.
+# Level 4 is the robot level. A step earns it only when the source has robots
+# doing the work, not when it has factories hiring people to build them.
 
 # AI 2027, race ending (ai-2027.com). Stops in January 2030, before the
 # scenario's takeover and mid-2030 extinction: an economic model has nothing to
 # say about those.
 agi_schedule_ai2027_race = {
-	# Jan 2026: Agent-1 era agents at the two leading labs.
+	# Jan 2026: Agent-1 is released publicly.
 	if = { limit = { exists = c:USA } c:USA = { agi_set_tier_1 = yes } }
 	every_country = { limit = { agi_is_china = yes } agi_set_tier_1 = yes }
+	# Jan 2027: cheap public agents reach everyone else.
+	if = {
+		limit = { global_var:agi_month >= 12 }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_1 = yes }
+	}
 	# Jul 2027: Agent-3-mini released publicly (cheap remote worker).
 	if = {
 		limit = { global_var:agi_month >= 18 exists = c:USA }
@@ -25,24 +32,24 @@ agi_schedule_ai2027_race = {
 		limit = { global_var:agi_month >= 23 exists = c:USA }
 		c:USA = { agi_set_tier_3 = yes }
 	}
-	# Jan 2028: the rest of the world gets cheap remote workers.
 	if = {
 		limit = { global_var:agi_month >= 24 }
 		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_2 = yes }
 	}
-	# Mid 2028: Agent-5 released publicly; special economic zones and a robot build-out.
+	# Mid 2028: Agent-5 released publicly. Both powers open special economic
+	# zones, built and staffed by displaced workers. No robot level yet.
 	if = {
 		limit = { global_var:agi_month >= 30 }
-		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_4 = yes } }
 		every_country = { limit = { agi_is_china = yes } agi_set_tier_3 = yes }
 	}
-	# 2029: robots at scale in both powers; a universal basic income.
+	# Jan 2029: the zones reached a million robots a month at the end of 2028.
+	# A basic income is paid in 2029.
 	if = {
 		limit = { global_var:agi_month >= 36 }
 		if = {
 			limit = { exists = c:USA }
 			c:USA = {
-				agi_set_tier_5 = yes
+				agi_set_tier_4 = yes
 				agi_set_dividend_1 = yes
 			}
 		}
@@ -51,21 +58,32 @@ agi_schedule_ai2027_race = {
 			agi_set_tier_4 = yes
 			agi_set_dividend_1 = yes
 		}
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_3 = yes }
 	}
-	# Late 2029: special economic zones spread around the world.
+	# Late 2029: people are no longer needed in the US. Zones full of robots
+	# spread around the world, and the basic income is described for everyone.
 	if = {
 		limit = { global_var:agi_month >= 45 }
-		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_3 = yes }
+		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_5 = yes } }
+		every_country = {
+			limit = { agi_is_rest_of_world = yes }
+			agi_set_tier_4 = yes
+			agi_set_dividend_1 = yes
+		}
 	}
 	if = { limit = { global_var:agi_month >= 48 } agi_end_scenario = yes }
 }
 
 # AI 2027, slowdown ending (ai-2027.com/slowdown). Same as the race until the
-# October 2027 branch point. AI research slows, but AI reaches the economy as
-# fast as in the race and spreads further.
+# October 2027 branch point, when AI research slows. We read the economy as
+# changing about as fast as in the race, and spreading further.
 agi_schedule_ai2027_slowdown = {
 	if = { limit = { exists = c:USA } c:USA = { agi_set_tier_1 = yes } }
 	every_country = { limit = { agi_is_china = yes } agi_set_tier_1 = yes }
+	if = {
+		limit = { global_var:agi_month >= 12 }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_1 = yes }
+	}
 	if = {
 		limit = { global_var:agi_month >= 18 exists = c:USA }
 		c:USA = { agi_set_tier_2 = yes }
@@ -78,36 +96,32 @@ agi_schedule_ai2027_slowdown = {
 		limit = { global_var:agi_month >= 24 }
 		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_2 = yes }
 	}
-	# May 2028: superhuman AI released to the public. The special economic zones
-	# both powers announced in February are running.
+	# May 2028: superhuman AI released to the public. The zones both powers
+	# announced in February run on human factory workers; robots are still few.
 	if = {
 		limit = { global_var:agi_month >= 28 }
-		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_4 = yes } }
-		every_country = { limit = { agi_is_china = yes } agi_set_tier_4 = yes }
-	}
-	# Jun 2028: factories around the world run round the clock.
-	if = {
-		limit = { global_var:agi_month >= 29 }
-		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_3 = yes }
+		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_3 = yes } }
+		every_country = { limit = { agi_is_china = yes } agi_set_tier_3 = yes }
 	}
 	# 2029: robots commonplace; a basic income and foreign aid end poverty,
 	# even in developing countries.
 	if = {
 		limit = { global_var:agi_month >= 36 }
-		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_5 = yes } }
-		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_4 = yes }
+		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_4 = yes } }
+		every_country = { limit = { agi_is_china = yes } agi_set_tier_4 = yes }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_3 = yes }
 		every_country = {
 			limit = { NOT = { is_country_type = decentralized } }
 			agi_set_dividend_1 = yes
 		}
 	}
-	# 2030: the transformation reaches everyone.
+	# 2030: the two leading economies become AI-run. In 2029 the source still
+	# puts this a few years away, so the date is our reading.
 	if = {
 		limit = { global_var:agi_month >= 48 }
-		every_country = {
-			limit = { NOT = { is_country_type = decentralized } }
-			agi_set_tier_5 = yes
-		}
+		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_5 = yes } }
+		every_country = { limit = { agi_is_china = yes } agi_set_tier_5 = yes }
+		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_4 = yes }
 	}
 	if = { limit = { global_var:agi_month >= 60 } agi_end_scenario = yes }
 }
@@ -115,7 +129,8 @@ agi_schedule_ai2027_slowdown = {
 # AI 2040: Plan A (ai-2040.com). A 2029 US-China deal pauses training and
 # verifies compute. From 2032 robot and compute growth is capped and a citizen's
 # dividend is paid. AI is held at top-expert level from 2035. The site's data
-# puts China about two years behind the US and the rest of the world about three.
+# puts China about two years behind the US in AI cognitive labour but close to
+# it in robot labour, and the rest of the world about three years behind.
 agi_schedule_ai2040_plan_a = {
 	# 2027: millions of AI agents in the US economy.
 	if = {
@@ -127,8 +142,9 @@ agi_schedule_ai2040_plan_a = {
 		limit = { global_var:agi_month >= 24 }
 		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_1 = yes }
 	}
-	# 2029-2030: training pause and verification. Deployment holds (no step).
-	# 2031: first regulated models; AI does a third of US cognitive labour.
+	# 2029-2030: training pause and verification. AI use keeps spreading, but
+	# employment is flat (no step).
+	# 2031: first regulated models; AI does a third of cognitive labour by mid-year.
 	if = {
 		limit = { global_var:agi_month >= 60 exists = c:USA }
 		c:USA = { agi_set_tier_2 = yes }
@@ -174,12 +190,10 @@ agi_schedule_ai2040_plan_a = {
 	}
 	# 2036: top-expert AI at full scale: 2 billion robots, a quarter of
 	# Americans employed. Scaling to superintelligence only resumes in 2040.
+	# China's robots arrive a year after the US's, not two.
 	if = {
-		limit = { global_var:agi_month >= 120 exists = c:USA }
-		c:USA = { agi_set_tier_5 = yes }
-	}
-	if = {
-		limit = { global_var:agi_month >= 132 }
+		limit = { global_var:agi_month >= 120 }
+		if = { limit = { exists = c:USA } c:USA = { agi_set_tier_5 = yes } }
 		every_country = { limit = { agi_is_china = yes } agi_set_tier_4 = yes }
 	}
 	if = {
@@ -187,9 +201,14 @@ agi_schedule_ai2040_plan_a = {
 		every_country = { limit = { agi_is_china = yes } agi_set_tier_5 = yes }
 		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_4 = yes }
 	}
+	# 2039: even the poorest people outside the US receive about $1M.
 	if = {
 		limit = { global_var:agi_month >= 156 }
-		every_country = { limit = { agi_is_rest_of_world = yes } agi_set_tier_5 = yes }
+		every_country = {
+			limit = { agi_is_rest_of_world = yes }
+			agi_set_tier_5 = yes
+			agi_set_dividend_2 = yes
+		}
 	}
 	if = { limit = { global_var:agi_month >= 180 } agi_end_scenario = yes }
 }

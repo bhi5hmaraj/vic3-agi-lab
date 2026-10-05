@@ -9,7 +9,7 @@ The goal is intuition, not prediction. What you learn here should be ported back
 ```
 game rules --> monthly clock --> scenario schedule --> agi_set_tier_N --> agi_tier_N modifier
  (scenario,     (month 0 =        (month, who,         (country)          (each sector: fewer workers, more output)
-  start year)    shock start)      level 1-5)                           + agi_dividend_N modifier (income support)
+  start year)    shock start)      level 1-5)                           + agi_dividend_N modifier (income floor)
                                                                         + player event (what to watch)
 ```
 
@@ -18,12 +18,13 @@ game rules --> monthly clock --> scenario schedule --> agi_set_tier_N --> agi_ti
 - `common/scripted_effects/agi_effects.txt`: the mechanism. It holds the clock, the tier and dividend effects, and the notifications.
 - `common/scripted_effects/agi_scenarios.txt`: the data. There is one schedule per scenario, and each step is a month, a group of countries and a level.
 - `common/scripted_triggers/agi_triggers.txt`: `agi_is_china` and `agi_is_rest_of_world`.
-- `common/static_modifiers/agi_modifiers.txt`: the five tier modifiers (jobs and output per sector) and two dividend modifiers.
+- `common/static_modifiers/agi_modifiers.txt`: the five tier modifiers (jobs and output per sector) and two income-floor modifiers.
+- `common/modifier_type_definitions/agi_modifier_types.txt`: defines the four farm and ranch modifier types the base game lacks.
 - `events/agi_events.txt` and `localization/english/agi_l_english.yml`: the plain-language reports for players.
 - `common/defines/zz_agi_defines.txt`: moves CWE's end date from 2092 to 2200, so long runs never stop.
 - `tools/lint.py`: static checks, since the game can't run in CI.
 
-Mechanism and data are kept apart on purpose. A new scenario means one new effect in `agi_scenarios.txt`, one game rule option and three localisation lines.
+Mechanism and data are kept apart on purpose. A new scenario needs six things. It needs one schedule effect in `agi_scenarios.txt`, ending with `agi_end_scenario`, and one game rule option. It needs one branch each in `agi_scenario_tick` and `agi_notify_players` (`agi_effects.txt`). And it needs one briefing event and four localisation lines. `docs/extending.md` will replace this with a data file per scenario.
 
 ## Decisions
 
@@ -65,7 +66,7 @@ v0.1 also leaned on CWE's automation production methods for the job cuts. The re
 
 The automation dynamics don't depend on the calendar. So each scenario's January 2026 is mapped to a start year you choose (1955, 1970 or 1985), and the schedule counts months from there.
 
-The shock itself works at any start year, because it needs no technology (decision 4). What changes with the start year is the economy being shocked. In 1955 most people work on farms and in factories, so the early, office-only AI levels move less. By 1985 the service sector is larger and the result is closer to today's. That is why the start year is a game rule and not a constant.
+The shock itself works at any start year, because it needs no technology (decision 4). What changes with the start year is the economy being shocked. In 1955 most people work on farms and in factories, so the first, office-only AI level moves less. By 1985 the service sector is larger and the result is closer to today's. That is why the start year is a game rule and not a constant.
 
 ### 4. How the shock enters the economy
 
@@ -78,7 +79,9 @@ The shock itself works at any start year, because it needs no technology (decisi
 
 A level is one `agi_tier_N` modifier. For each sector it sets `building_group_<group>_employee_mult` (fewer workers per building) and `building_group_<group>_throughput_add` (more output). CWE pairs the same two keys in its own `oil_industry_concessions` modifier, so the pattern is known to work on this engine.
 
-Sectors move in the order the scenarios describe. Services (knowledge work) go first. Factories follow from level 2. Commercial farms, ranches and mines follow from level 4, when robots arrive. Subsistence farms are left out, because that is where the jobless end up.
+A building-group modifier only exists once its type is defined. The base game defines the two keys for services, manufacturing and mining. It does not define them for staple crops or livestock ranches, so this mod does, the way CWE defines one for urban centres.
+
+Sectors move in the order the scenarios describe. Services (knowledge work) go first. Factories follow from level 2. Staple-crop farms, ranches and mines follow from level 4, when robots arrive. Subsistence farms are left out, because that is where the jobless end up: in CWE a displaced worker usually becomes a Peasant there.
 
 v0.1 granted CWE's techs instead. An adversarial review found that this would not work:
 
@@ -111,9 +114,9 @@ Add a second dial only if a scenario needs frontier capability to change economi
 
 With game rules, a newcomer never touches the console, and the control run is the same game with the scenario set to "none".
 
-Steps use `month >= M` and levels only ever go up. So a step re-running every month is a no-op, a missed month still applies, and loading a save mid-scenario is safe.
+Steps use `month >= M` and levels only ever go up. So a step re-running every month is a no-op, a missed month still applies, and loading a save mid-scenario is safe. The schedule keeps running after the scenario ends, so a country CWE creates later still gets its group's final level.
 
-Countries are grouped into the US, China and everyone else (recognised countries only). China is matched by either tag, PRC or CHI, because CWE can change one into the other. The scenarios are US-China stories, and everyone else follows with a lag.
+Countries are grouped into the US, China and everyone else. Everyone else is every country that is not decentralised, so CWE's unrecognised countries are included. China is matched by either tag, PRC or CHI, because CWE can change one into the other. The scenarios are US-China stories, and everyone else follows with a lag.
 
 ### 7. Newcomer layer
 
@@ -131,14 +134,14 @@ AI 2027 is precise about timing and almost silent on economics. Its only labour 
 
 AI 2040: Plan A publishes a per-year dashboard. US employment goes 62% (2029), 32% (2035), 12% (2040). Median income goes $47K (2027), about $1.1M (2035), about $13M (2040). GDP grows about 50% in 2032.
 
-The tier and dividend modifier values are knobs, not sourced numbers. Tune them until the Victoria 3 run matches the *shape* of those curves: direction and ordering. Don't aim for the absolute values. The engine won't reproduce a 99% income-per-capita jump, and trying would break it.
+The tier and income-floor values are knobs, not sourced numbers. Tune them until the Victoria 3 run matches the *shape* of those curves: direction and ordering. Don't aim for the absolute values. The engine won't reproduce a 99% income-per-capita jump, and trying would break it.
 
 ### 9. Verifying without the game
 
 Victoria 3 can't run in CI, so the repo checks what it can statically:
-- `tools/lint.py` checks balanced braces, and that every scripted effect, modifier, event and game-rule option is defined. It also checks every localisation key, the UTF-8 byte-order mark the engine requires, and that no job cut goes below the -0.8 floor. With `--cwe PATH`, it checks that every building group a modifier names exists in CWE.
+- `tools/lint.py` checks balanced braces, and that every scripted effect, modifier, event and game-rule option is defined. It also checks every localisation key, the UTF-8 byte-order mark the engine requires, and that no job cut goes below the -0.8 floor. It checks that every modifier key has a defined type, against a short list verified in the base game plus the types this mod defines. With `--cwe PATH`, it checks that every building group a modifier names exists in CWE.
 - Every engine construct used here was copied from a pattern CWE itself uses in the same scope.
-- An adversarial review checked engine semantics, fidelity to the scenarios, and economic logic. Fourteen findings survived two skeptics each. `CHANGELOG.md` lists what changed.
+- Two adversarial reviews checked engine semantics, fidelity to the scenarios, economic logic and the docs. A skeptic tried to refute each finding. `CHANGELOG.md` lists what changed.
 - The in-game checks that remain are listed in the README under "First evening".
 
 ### 10. Pinning
@@ -150,6 +153,8 @@ Game 1.13.11 plus CWE commit `fd5cb37909` (2026-08-30, the last 1.13 build). CWE
 - Cuts by job type inside a sector (see decision 4).
 - Government jobs. No level cuts bureaucrats.
 - Plantations, logging and fishing. Level 4 and 5 cover staple crops, livestock ranches and mines only.
+- CWE's infrastructure: power plants, railways, ports, communications, construction and real estate. It is neither automated nor boosted, and it feeds the boosted sectors, so its goods may run short at levels 4-5.
+- Funding for the income floor. Each country pays its own from its budget.
 - The policymaker panel and a UBI law with interest-group reactions.
 - AI 2040's other plans (B, C, D). Its Plans C and D map onto AI 2027's endings anyway.
 - AI 2027's race ending after January 2030. The takeover and extinction are outside what an economic model can say anything about, so the scenario stops there.

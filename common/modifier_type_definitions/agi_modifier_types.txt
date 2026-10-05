@@ -1,0 +1,39 @@
+# A building-group modifier only exists once its type is defined. Vanilla
+# defines these for services, manufacturing and mining, but not for these two
+# groups. CWE does the same for building_group_bg_urban_center_throughput_add.
+
+building_group_bg_staple_crops_employee_mult = {
+	decimals = 1
+	color = bad
+	percent = yes
+	game_data = {
+		ai_value = 0
+	}
+}
+
+building_group_bg_staple_crops_throughput_add = {
+	decimals = 0
+	color = good
+	percent = yes
+	game_data = {
+		ai_value = 0
+	}
+}
+
+building_group_bg_livestock_ranches_employee_mult = {
+	decimals = 1
+	color = bad
+	percent = yes
+	game_data = {
+		ai_value = 0
+	}
+}
+
+building_group_bg_livestock_ranches_throughput_add = {
+	decimals = 0
+	color = good
+	percent = yes
+	game_data = {
+		ai_value = 0
+	}
+}

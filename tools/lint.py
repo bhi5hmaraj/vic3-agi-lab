@@ -11,6 +11,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 BOM = b"\xef\xbb\xbf"
 LOC_PATH = ROOT / "localization/english/agi_l_english.yml"
+# Modifier types the game defines, checked against vanilla's
+# common/modifier_type_definitions. Any other key must be defined by this mod,
+# or the engine drops it with an "Unknown modifier type" error.
+VANILLA_MODIFIER_TYPES = {
+    "building_group_bg_service_employee_mult", "building_group_bg_service_throughput_add",
+    "building_group_bg_manufacturing_employee_mult", "building_group_bg_manufacturing_throughput_add",
+    "building_group_bg_mining_employee_mult", "building_group_bg_mining_throughput_add",
+    "state_welfare_payments_add", "state_standard_of_living_add",
+}
 
 
 def script(path):
@@ -67,10 +76,18 @@ def check_localisation(files):
     rules = "\n".join(_rule_texts(files))
     options = re.findall(r"^\t(\w+) = \{", rules, re.M)
     needed = set(re.findall(r"(?:title|desc|name) = (agi\.[\w.]+)", text))
-    needed |= {k for m in _defined(files, "common/static_modifiers") for k in (m, m + "_desc")}
+    named = _defined(files, "common/static_modifiers") | _defined(files, "common/modifier_type_definitions")
+    needed |= {k for m in named for k in (m, m + "_desc")}
     needed |= {"rule_" + r for r in top_level_keys(rules)}
     needed |= {k for o in options for k in ("setting_" + o, "setting_" + o + "_desc")}
     return errors + [f"missing localisation key: {k}" for k in sorted(needed - loc)]
+
+
+def check_modifier_types(files):
+    defined = VANILLA_MODIFIER_TYPES | _defined(files, "common/modifier_type_definitions")
+    modifiers = "\n".join(t for p, t in files.items() if "common/static_modifiers" in p.as_posix())
+    used = set(re.findall(r"^\t(\w+) = -?[\d.]", modifiers, re.M))
+    return [f"modifier type not defined: {k}" for k in sorted(used - defined)]
 
 
 def check_employee_floor(files):
@@ -87,8 +104,10 @@ def check_cwe_building_groups(files, cwe):
 
 
 def main():
-    files = {p: script(p) for p in ROOT.rglob("*.txt") if "tools" not in p.parts}
-    errors = check_braces(files) + check_references(files) + check_localisation(files) + check_employee_floor(files)
+    files = {p: script(p) for d in ("common", "events") for p in (ROOT / d).rglob("*.txt")}
+    errors = [] if files else ["no script files found"]
+    errors += check_braces(files) + check_references(files) + check_localisation(files)
+    errors += check_modifier_types(files) + check_employee_floor(files)
     if "--cwe" in sys.argv:
         errors += check_cwe_building_groups(files, Path(sys.argv[sys.argv.index("--cwe") + 1]))
     for e in errors:

@@ -121,11 +121,12 @@ agi_notify_players = {
 
 # Global scope, monthly. Starts the scenario clock at the chosen shock date,
 # advances it one month per month, and applies the active scenario's schedule.
+# It keeps running after the scenario ends, so a country CWE creates later
+# (decolonisation, the Soviet break-up) still gets its group's final level.
 agi_scenario_tick = {
 	if = {
 		limit = {
 			NOT = { has_game_rule = agi_scenario_none }
-			NOT = { has_global_variable = agi_scenario_over }
 			OR = {
 				AND = { has_game_rule = agi_shock_start_1955 game_date >= 1955.1.1 }
 				AND = { has_game_rule = agi_shock_start_1970 game_date >= 1970.1.1 }
@@ -155,7 +156,11 @@ agi_scenario_tick = {
 	}
 }
 
+# Fires once. Every schedule ends by calling it.
 agi_end_scenario = {
-	set_global_variable = agi_scenario_over
-	agi_notify_players = yes
+	if = {
+		limit = { NOT = { has_global_variable = agi_scenario_over } }
+		set_global_variable = agi_scenario_over
+		agi_notify_players = yes
+	}
 }

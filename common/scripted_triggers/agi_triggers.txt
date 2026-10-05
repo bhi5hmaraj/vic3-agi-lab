@@ -7,7 +7,7 @@ agi_is_china = {
 	}
 }
 
-# Country scope: every recognised country except the two leading AI powers.
+# Country scope: every non-decentralised country except the two leading AI powers.
 agi_is_rest_of_world = {
 	NOT = { is_country_type = decentralized }
 	NOT = { c:USA ?= this }

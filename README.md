@@ -6,11 +6,11 @@ Victoria 3 then works out who loses jobs and what happens to wages and living st
 
 It is a lab for building intuition, not a forecast.
 
-**Status: v0.2, not yet tested in game.** Every engine construct is copied from a pattern CWE itself uses, `tools/lint.py` passes, and an adversarial review has been applied (see [CHANGELOG.md](CHANGELOG.md)). The in-game checks are listed under "First evening" below.
+**Status: v0.3, not yet tested in game.** Every engine construct is copied from a pattern CWE itself uses, `tools/lint.py` passes, and two adversarial reviews have been applied (see [CHANGELOG.md](CHANGELOG.md)). The in-game checks are listed under "First evening" below.
 
 ## How the shock works
 
-Each country has an AI level from 0 to 5. A level is one modifier: each sector needs fewer workers and produces more. Services go first, factories next, and farms and mines last, when robots arrive. Some scenario steps also pay an AI dividend, which gives people income whether or not they work.
+Each country has an AI level from 0 to 5. A level is one modifier: each sector needs fewer workers and produces more. Services go first, factories next, and farms and mines last, when robots arrive. Some scenario steps also add an income floor for the jobless and the low-paid.
 
 The level tables are in [docs/scenarios.md](docs/scenarios.md).
 
@@ -33,28 +33,29 @@ The level tables are in [docs/scenarios.md](docs/scenarios.md).
 1. New game. Under **Game Rules**, set **AI Scenario** and **AI Shock Start**.
 2. Pick a country (the USA is a good first choice) and let time run. The game's private investment builds the economy without you. The shock applies to your country the same way it applies to AI-run ones.
 3. When the shock starts, and each time your country reaches a new AI level, an event explains what changed and what to watch.
-4. Read five things: **Employment**, **Standard of Living**, **Radicals**, **Interest Groups** (who holds power) and **GDP**.
+4. Read five things: **Jobs**, **Standard of Living**, **Radicals**, **Interest Groups** (who holds power) and **GDP**. For jobs, count Peasants and Unemployed together as the jobless. In CWE a displaced worker usually becomes a Peasant on a subsistence farm, so the Unemployed figure alone understates the shock.
 5. Run the same setup again with **AI Scenario: None** as your control, and compare.
 
-Observe mode (the `observe` console command) also works, but observers don't see the events. Open the USA or China and look for the "AI Level" modifier instead.
+Observe mode (the `observe` console command) also works, but observers don't see the events. Open the USA or China and look for the "AI Level" modifier instead. Its line "Urban Center Employees" is the service-sector job cut. The label comes from the base game.
 
 ## Experiments
 
 - **Treatment vs control:** same start, same rules, same country. Only the scenario differs.
 - **Noise:** repeat the control 2-3 times. The spread is the noise floor. A scenario effect smaller than that is not an effect.
 - **Sanity:** the control must not show the scenario's patterns. If it does, something else is driving them.
-- **Compare scenarios:** employment should fall sooner under the race than under Plan A, and the US-China gap should widen more.
-- **Compare countries:** in one run, the US, China and a rest-of-world country reach each level at different times.
+- **Compare scenarios:** employment should fall sooner under the race than under Plan A. The US-China gap is widest mid-run in Plan A. Only the race ends with the gap still open.
+- **Compare countries:** in one run, the US, China and a rest-of-world country follow different timetables. The tables in [docs/scenarios.md](docs/scenarios.md) show when each reaches a level.
 
 The scenario schedules, their sources and the calibration targets are in [docs/scenarios.md](docs/scenarios.md).
 
 ## First evening (in-game checks)
 
-1. Enable debug mode (Steam launch option `-debug_mode`) and start a game with a scenario. Check `logs/error.log` for errors that mention `agi`.
-2. At the shock start, do the events fire and do the modifiers appear (country panel, modifiers)?
-3. After a level step, does employment in service buildings fall by about the level's share, with output per building up?
-4. Does the dividend raise incomes, and can the government budget carry it? Welfare payments are a state expense.
-5. Is the monthly speed still fine with ~200 countries checked each month?
+1. Enable debug mode (Steam launch option `-debug_mode`) and start a game with a scenario. Check `logs/error.log` for errors that mention `agi`, and for any "Unknown modifier type" line.
+2. At the shock start, does the briefing event fire? When your country's first level is due, does the "AI Level" modifier appear (country panel, modifiers)? That is month 0 for the USA and China in AI 2027 and month 12 in Plan A. Other countries wait until month 12 or 24.
+3. After a level step, does employment in service buildings fall by about the level's share, with output per building up? Does the Peasant count in the same state rise by about the same number?
+4. Does the income floor raise incomes, and can the government budget carry it? Watch for countries going into default. Default cuts throughput by half, which would swamp the AI effect.
+5. At levels 4-5, check electricity and transportation in a few US states. Is supply under half of demand, and do service or factory buildings show an input-shortage penalty?
+6. Is the monthly speed still fine with ~200 countries checked each month?
 
 ## Design
 
